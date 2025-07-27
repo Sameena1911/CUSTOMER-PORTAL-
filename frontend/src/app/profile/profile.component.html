@@ -1,0 +1,84 @@
+<div class="profile-container">
+  <header class="profile-header">
+    <button class="back-btn" (click)="goBack()">← Back to Dashboard</button>
+    <h1>Customer Profile</h1>
+  </header>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Loading your profile...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error">
+    <h3>Error Loading Profile</h3>
+    <p>{{ error }}</p>
+    <button class="retry-btn" (click)="loadProfile()">Retry</button>
+  </div>
+
+  <!-- Profile Content -->
+  <div *ngIf="profile && !loading && !error" class="profile-content">
+    <div class="profile-card">
+      <div class="profile-avatar">
+        <div class="avatar-placeholder">
+          {{ profile.customerName.charAt(0).toUpperCase() }}
+        </div>
+      </div>
+      
+      <div class="profile-info">
+        <h2>{{ profile.customerName }}</h2>
+        <p class="customer-id">Customer ID: {{ profile.custId }}</p>
+        <span class="status-badge" [class.active]="profile.status === 'Active'">
+          {{ profile.status || 'Active' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="details-grid">
+      <div class="detail-card">
+        <div class="detail-icon">📧</div>
+        <div class="detail-content">
+          <h3>Email</h3>
+          <p>{{ profile.email }}</p>
+        </div>
+      </div>
+
+      <div class="detail-card">
+        <div class="detail-icon">📞</div>
+        <div class="detail-content">
+          <h3>Phone</h3>
+          <p>{{ profile.phone }}</p>
+        </div>
+      </div>
+
+      <div class="detail-card">
+        <div class="detail-icon">🏠</div>
+        <div class="detail-content">
+          <h3>Address</h3>
+          <p>{{ profile.address }}</p>
+        </div>
+      </div>
+
+      <div class="detail-card">
+        <div class="detail-icon">🌍</div>
+        <div class="detail-content">
+          <h3>Location</h3>
+          <p>{{ profile.city }}{{ profile.postalCode ? ', ' + profile.postalCode : '' }}{{ profile.country ? ', ' + profile.country : '' }}</p>
+        </div>
+      </div>
+
+      <div class="detail-card" *ngIf="profile.joinDate">
+        <div class="detail-icon">📅</div>
+        <div class="detail-content">
+          <h3>Member Since</h3>
+          <p>{{ profile.joinDate }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="edit-btn" (click)="editProfile()">Edit Profile</button>
+    </div>
+  </div>
+</div>

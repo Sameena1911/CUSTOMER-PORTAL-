@@ -1,0 +1,230 @@
+<div class="sales-order-container">
+  <header class="sales-order-header">
+    <div class="header-content">
+      <button class="back-btn" (click)="goBack()">
+        <span class="back-icon">←</span>
+        Back to Dashboard
+      </button>
+      <h1>Sales Order Data</h1>
+      <button class="refresh-btn" (click)="refreshData()" [disabled]="loading">
+        <span class="refresh-icon">🔄</span>
+        Refresh
+      </button>
+    </div>
+  </header>
+
+  <main class="sales-order-main">
+    <div class="sales-order-info">
+      <h2>Sales Order Records for Customer: {{ customerId }}</h2>
+      <div class="info-actions">
+        <p class="total-count" *ngIf="!loading && !error">
+          Showing {{ totalCount }} of {{ salesOrders.length }} records
+        </p>
+        <button class="filter-toggle-btn" (click)="toggleFilters()" *ngIf="!loading && !error && salesOrders.length > 0">
+          <span class="filter-icon">🔍</span>
+          {{ showFilters ? 'Hide Filters' : 'Show Filters' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div *ngIf="showFilters && !loading && !error" class="filter-container">
+      <div class="filter-header">
+        <h3>Filter Options</h3>
+        <div class="filter-actions">
+          <button class="apply-btn" (click)="applyFilters()">Apply Filters</button>
+          <button class="clear-btn" (click)="clearFilters()">Clear All</button>
+        </div>
+      </div>
+      
+      <div class="filter-grid">
+        <!-- Sales Document Filter -->
+        <div class="filter-group">
+          <label for="salesDocument">Sales Document</label>
+          <input
+            type="text"
+            id="salesDocument"
+            [(ngModel)]="filters.salesDocument"
+            placeholder="Enter sales document number"
+            class="filter-input"
+            (input)="applyFilters()"
+          />
+        </div>
+
+        <!-- Document Type Filter -->
+        <div class="filter-group">
+          <label for="documentType">Document Type</label>
+          <select
+            id="documentType"
+            [(ngModel)]="filters.documentType"
+            class="filter-select"
+            (change)="applyFilters()"
+          >
+            <option value="">All Types</option>
+            <option *ngFor="let type of getUniqueDocumentTypes()" [value]="type">
+              {{ getDocumentTypeDescription(type) }} ({{ type }})
+            </option>
+          </select>
+        </div>
+
+        <!-- Sales Organization Filter -->
+        <div class="filter-group">
+          <label for="salesOrganization">Sales Organization</label>
+          <select
+            id="salesOrganization"
+            [(ngModel)]="filters.salesOrganization"
+            class="filter-select"
+            (change)="applyFilters()"
+          >
+            <option value="">All Organizations</option>
+            <option *ngFor="let org of getUniqueSalesOrganizations()" [value]="org">
+              {{ org }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Distribution Channel Filter -->
+        <div class="filter-group">
+          <label for="distributionChannel">Distribution Channel</label>
+          <select
+            id="distributionChannel"
+            [(ngModel)]="filters.distributionChannel"
+            class="filter-select"
+            (change)="applyFilters()"
+          >
+            <option value="">All Channels</option>
+            <option *ngFor="let channel of getUniqueDistributionChannels()" [value]="channel">
+              {{ channel }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Material Description Filter -->
+        <div class="filter-group">
+          <label for="materialDescription">Material Description</label>
+          <input
+            type="text"
+            id="materialDescription"
+            [(ngModel)]="filters.materialDescription"
+            placeholder="Enter material description"
+            class="filter-input"
+            (input)="applyFilters()"
+          />
+        </div>
+
+        <!-- Sales Unit Filter -->
+        <div class="filter-group">
+          <label for="salesUnit">Sales Unit</label>
+          <input
+            type="text"
+            id="salesUnit"
+            [(ngModel)]="filters.salesUnit"
+            placeholder="Enter sales unit"
+            class="filter-input"
+            (input)="applyFilters()"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading sales order data from SAP...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error && !loading" class="error-container">
+      <div class="error-icon">⚠️</div>
+      <h3>Error Loading Sales Order Data</h3>
+      <p>{{ error }}</p>
+      <button class="retry-btn" (click)="refreshData()">Try Again</button>
+    </div>
+
+    <!-- Data Table -->
+    <div *ngIf="!loading && !error && filteredSalesOrders.length > 0" class="table-container">
+      <div class="table-responsive">
+        <table class="sales-order-table">
+          <thead>
+            <tr>
+              <th>Sales Document</th>
+              <th>Document Type</th>
+              <th>Sales Org</th>
+              <th>Distribution Channel</th>
+              <th>Customer ID</th>
+              <th>Sales Unit</th>
+              <th>Material Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let order of filteredSalesOrders; let i = index" 
+                [class.even]="i % 2 === 0" 
+                [class.odd]="i % 2 === 1">
+              <td class="document-cell">
+                <span class="document-number">{{ order.vbeln }}</span>
+              </td>
+              <td class="type-cell">
+                <span class="type-badge" [class]="'type-' + order.auart">
+                  {{ getDocumentTypeDescription(order.auart) }}
+                </span>
+              </td>
+              <td class="org-cell">{{ order.vkorg }}</td>
+              <td class="channel-cell">{{ order.vtweg }}</td>
+              <td class="customer-cell">{{ order.kunnr }}</td>
+              <td class="unit-cell">{{ order.vrkme }}</td>
+              <td class="description-cell">{{ order.arktx }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- No Data State - No matching filters -->
+    <div *ngIf="!loading && !error && salesOrders.length > 0 && filteredSalesOrders.length === 0" class="no-data-container">
+      <div class="no-data-icon">🔍</div>
+      <h3>No Records Match Your Filter</h3>
+      <p>Try adjusting your filter criteria to see more results</p>
+      <button class="clear-btn" (click)="clearFilters()">Clear Filters</button>
+    </div>
+
+    <!-- No Data State - No sales orders at all -->
+    <div *ngIf="!loading && !error && salesOrders.length === 0" class="no-data-container">
+      <div class="no-data-icon">🛒</div>
+      <h3>No Sales Order Data Found</h3>
+      <p>There are no sales order records for customer {{ customerId }}</p>
+      <button class="refresh-btn" (click)="refreshData()">Refresh Data</button>
+    </div>
+
+    <!-- Data Summary -->
+    <div *ngIf="!loading && !error && filteredSalesOrders.length > 0" class="data-summary">
+      <div class="summary-cards">
+        <div class="summary-card">
+          <div class="summary-icon">📊</div>
+          <div class="summary-content">
+            <h4>Filtered Records</h4>
+            <p class="summary-number">{{ totalCount }}</p>
+            <p class="summary-subtitle">of {{ salesOrders.length }} total</p>
+          </div>
+        </div>
+        
+        <div class="summary-card">
+          <div class="summary-icon">✅</div>
+          <div class="summary-content">
+            <h4>Active Orders</h4>
+            <p class="summary-number">{{ getActiveSalesOrderCount() }}</p>
+            <p class="summary-subtitle">Currently active</p>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-icon">🎯</div>
+          <div class="summary-content">
+            <h4>Customer ID</h4>
+            <p class="summary-number">{{ customerId }}</p>
+            <p class="summary-subtitle">Active filters: {{ getActiveFilterCount() }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

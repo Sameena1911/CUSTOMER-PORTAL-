@@ -1,0 +1,206 @@
+<div class="home-container">
+  <header class="header">
+    <h1>Customer Portal Dashboard</h1>
+    <div class="user-info">
+      <span *ngIf="!profileLoading && profile">Welcome, {{ profile.name1 || profile.customerName || 'Customer' }}!</span>
+      <span *ngIf="profileLoading">Welcome, Customer!</span>
+      <span *ngIf="!profileLoading && !profile">Welcome, Customer!</span>
+      <button class="logout-btn" (click)="logout()">Logout</button>
+    </div>
+  </header>
+
+  <main class="dashboard">
+    <div class="welcome-section">
+      <h2>Customer Dashboard</h2>
+      <p>Complete view of your transactions and business relationship with our company</p>
+      
+      <!-- Profile Information Display -->
+      <div class="profile-info" *ngIf="!profileLoading && profile">
+        <div class="profile-details">
+          <div class="profile-item">
+            <strong>Customer ID:</strong> {{ profile.kunnr || profile.custId || customerId }}
+          </div>
+          <div class="profile-item" *ngIf="profile.name1">
+            <strong>Name:</strong> {{ profile.name1 }}
+          </div>
+          <div class="profile-item" *ngIf="profile.stras">
+            <strong>Street & House Number:</strong> {{ profile.stras }}
+          </div>
+          <div class="profile-item" *ngIf="profile.ort01">
+            <strong>City:</strong> {{ profile.ort01 }}
+          </div>
+          <div class="profile-item" *ngIf="profile.pstlz">
+            <strong>Postal Code:</strong> {{ profile.pstlz }}
+          </div>
+          <div class="profile-item" *ngIf="profile.message" style="grid-column: 1 / -1;">
+            <strong>Message:</strong> {{ profile.message }}
+          </div>
+        </div>
+      </div>
+      
+      <div class="profile-loading" *ngIf="profileLoading">
+        <p>Loading profile information...</p>
+      </div>
+    </div>
+
+    <!-- Sales Transaction Dashboard -->
+    <div class="sales-dashboard">
+      <h2 class="section-title">Sales Transaction Dashboard</h2>
+      <div class="transaction-cards">
+        
+        <!-- Inquiry Data Card -->
+        <div class="card transaction-card" (click)="navigateToInquiries()">
+          <div class="card-header">
+            <div class="card-icon inquiry-icon">📋</div>
+            <h3>Inquiry Data</h3>
+          </div>
+          <div class="card-content">
+            <p>View all your product inquiries and quotations</p>
+            <div class="stats" *ngIf="!inquiryStats.loading">
+              <div class="stat-item">
+                <span class="stat-number">{{ inquiryStats.total || '0' }}</span>
+                <span class="stat-label">Total Inquiries</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">{{ inquiryStats.recentCount || '0' }}</span>
+                <span class="stat-label">Recent (30 days)</span>
+              </div>
+            </div>
+            <div class="stats loading-stats" *ngIf="inquiryStats.loading">
+              <div class="stat-item">
+                <span class="stat-number loading-text">...</span>
+                <span class="stat-label">Loading</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number loading-text">...</span>
+                <span class="stat-label">Loading</span>
+              </div>
+            </div>
+          </div>
+          <button class="card-btn primary">View Inquiries</button>
+        </div>
+
+        <!-- Sales Order Data Card -->
+        <div class="card transaction-card" (click)="navigateToSalesOrders()">
+          <div class="card-header">
+            <div class="card-icon order-icon">🛒</div>
+            <h3>Sales Order Data</h3>
+          </div>
+          <div class="card-content">
+            <p>Track your sales orders and order history</p>
+            <div class="stats" *ngIf="!orderStats.loading">
+              <div class="stat-item">
+                <span class="stat-number">{{ orderStats.total || '0' }}</span>
+                <span class="stat-label">Total Orders</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">{{ orderStats.active || '0' }}</span>
+                <span class="stat-label">Active</span>
+              </div>
+            </div>
+            <div class="stats loading-stats" *ngIf="orderStats.loading">
+              <div class="stat-item">
+                <span class="stat-number loading-text">...</span>
+                <span class="stat-label">Loading</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number loading-text">...</span>
+                <span class="stat-label">Loading</span>
+              </div>
+            </div>
+          </div>
+          <button class="card-btn primary">View Orders</button>
+        </div>
+
+        <!-- List of Delivery Card -->
+        <div class="card transaction-card" (click)="navigateToDeliveries()">
+          <div class="card-header">
+            <div class="card-icon delivery-icon">🚚</div>
+            <h3>List of Delivery</h3>
+          </div>
+          <div class="card-content">
+            <p>Monitor your delivery status and history</p>
+            <div class="stats" *ngIf="!deliveryStats.loading">
+              <div class="stat-item">
+                <span class="stat-number">{{ deliveryStats.total || '0' }}</span>
+                <span class="stat-label">Total Deliveries</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">{{ deliveryStats.inTransit || '0' }}</span>
+                <span class="stat-label">In Transit</span>
+              </div>
+            </div>
+            <div class="stats loading-stats" *ngIf="deliveryStats.loading">
+              <div class="stat-item">
+                <span class="stat-number loading-text">...</span>
+                <span class="stat-label">Loading</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number loading-text">...</span>
+                <span class="stat-label">Loading</span>
+              </div>
+            </div>
+          </div>
+          <button class="card-btn primary">View Deliveries</button>
+        </div>
+
+        <!-- Financial Sheet Card -->
+        <div class="card transaction-card" (click)="navigateToFinancial()">
+          <div class="card-header">
+            <div class="card-icon financial-icon">💰</div>
+            <h3>Financial Sheet</h3>
+          </div>
+          <div class="card-content">
+            <p>View invoices, payments, aging, and financial summary</p>
+            <div class="stats" *ngIf="!financialStats.loading">
+              <div class="stat-item">
+                <span class="stat-number">{{ financialStats.totalOutstanding || '0' }}</span>
+                <span class="stat-label">Outstanding</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">{{ financialStats.overdueCount || '0' }}</span>
+                <span class="stat-label">Overdue</span>
+              </div>
+            </div>
+            <div class="stats loading-stats" *ngIf="financialStats.loading">
+              <div class="stat-item">
+                <span class="stat-number loading-text">...</span>
+                <span class="stat-label">Loading</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number loading-text">...</span>
+                <span class="stat-label">Loading</span>
+              </div>
+            </div>
+          </div>
+          <button class="card-btn primary">View Financial</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Quick Actions Section -->
+    <div class="quick-actions">
+      <h2 class="section-title">Quick Actions</h2>
+      <div class="action-cards">
+        <div class="card action-card" (click)="createNewInquiry()">
+          <div class="card-icon">➕</div>
+          <h4>New Inquiry</h4>
+          <p>Submit a new product inquiry</p>
+        </div>
+        
+        <div class="card action-card" (click)="contactSupport()">
+          <div class="card-icon">🎧</div>
+          <h4>Contact Support</h4>
+          <p>Get help from our support team</p>
+        </div>
+        
+        <div class="card action-card" (click)="downloadReports()">
+          <div class="card-icon">📊</div>
+          <h4>Download Reports</h4>
+          <p>Export your transaction reports</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

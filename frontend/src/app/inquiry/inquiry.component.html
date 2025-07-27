@@ -1,0 +1,237 @@
+<div class="inquiry-container">
+  <header class="inquiry-header">
+    <div class="header-content">
+      <button class="back-btn" (click)="goBack()">
+        <span class="back-icon">←</span>
+        Back to Dashboard
+      </button>
+      <h1>Customer Inquiry Data</h1>
+      <button class="refresh-btn" (click)="refreshData()" [disabled]="loading">
+        <span class="refresh-icon">🔄</span>
+        Refresh
+      </button>
+    </div>
+  </header>
+
+  <main class="inquiry-main">
+    <div class="inquiry-info">
+      <h2>Inquiry Records for Customer: {{ customerId }}</h2>
+      <div class="info-actions">
+        <p class="total-count" *ngIf="!loading && !error">
+          Showing {{ totalCount }} of {{ inquiries.length }} records
+        </p>
+        <button class="filter-toggle-btn" (click)="toggleFilters()" *ngIf="!loading && !error && inquiries.length > 0">
+          <span class="filter-icon">🔍</span>
+          {{ showFilters ? 'Hide Filters' : 'Show Filters' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div *ngIf="showFilters && !loading && !error" class="filter-container">
+      <div class="filter-header">
+        <h3>Filter Options</h3>
+        <div class="filter-actions">
+          <button class="apply-btn" (click)="applyFilters()">Apply Filters</button>
+          <button class="clear-btn" (click)="clearFilters()">Clear All</button>
+        </div>
+      </div>
+      
+      <div class="filter-grid">
+        <!-- Sales Document Filter -->
+        <div class="filter-group">
+          <label for="salesDocument">Sales Document</label>
+          <input
+            type="text"
+            id="salesDocument"
+            [(ngModel)]="filters.salesDocument"
+            placeholder="Enter sales document number"
+            class="filter-input"
+            (input)="applyFilters()"
+          />
+        </div>
+
+        <!-- Document Type Filter -->
+        <div class="filter-group">
+          <label for="documentType">Document Type</label>
+          <select
+            id="documentType"
+            [(ngModel)]="filters.documentType"
+            class="filter-select"
+            (change)="applyFilters()"
+          >
+            <option value="">All Types</option>
+            <option *ngFor="let type of getUniqueDocumentTypes()" [value]="type">
+              {{ getDocumentTypeDescription(type) }} ({{ type }})
+            </option>
+          </select>
+        </div>
+
+        <!-- Created By Filter -->
+        <div class="filter-group">
+          <label for="createdBy">Created By</label>
+          <input
+            type="text"
+            id="createdBy"
+            [(ngModel)]="filters.createdBy"
+            placeholder="Enter creator name"
+            class="filter-input"
+            (input)="applyFilters()"
+          />
+        </div>
+
+        <!-- Date From Filter -->
+        <div class="filter-group">
+          <label for="dateFrom">Date From</label>
+          <input
+            type="date"
+            id="dateFrom"
+            [(ngModel)]="filters.dateFrom"
+            class="filter-input"
+            (change)="applyFilters()"
+          />
+        </div>
+
+        <!-- Date To Filter -->
+        <div class="filter-group">
+          <label for="dateTo">Date To</label>
+          <input
+            type="date"
+            id="dateTo"
+            [(ngModel)]="filters.dateTo"
+            class="filter-input"
+            (change)="applyFilters()"
+          />
+        </div>
+
+        <!-- Min Value Filter -->
+        <div class="filter-group">
+          <label for="minValue">Min Value ($)</label>
+          <input
+            type="number"
+            id="minValue"
+            [(ngModel)]="filters.minValue"
+            placeholder="0.00"
+            step="0.01"
+            class="filter-input"
+            (input)="applyFilters()"
+          />
+        </div>
+
+        <!-- Max Value Filter -->
+        <div class="filter-group">
+          <label for="maxValue">Max Value ($)</label>
+          <input
+            type="number"
+            id="maxValue"
+            [(ngModel)]="filters.maxValue"
+            placeholder="999999.99"
+            step="0.01"
+            class="filter-input"
+            (input)="applyFilters()"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading inquiry data from SAP...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error && !loading" class="error-container">
+      <div class="error-icon">⚠️</div>
+      <h3>Error Loading Inquiry Data</h3>
+      <p>{{ error }}</p>
+      <button class="retry-btn" (click)="refreshData()">Try Again</button>
+    </div>
+
+    <!-- Data Table -->
+    <div *ngIf="!loading && !error && filteredInquiries.length > 0" class="table-container">
+      <div class="table-responsive">
+        <table class="inquiry-table">
+          <thead>
+            <tr>
+              <th>Sales Document</th>
+              <th>Document Type</th>
+              <th>Created Date</th>
+              <th>Created By</th>
+              <th>Net Value</th>
+              <th>Customer ID</th>
+              <th>Document Condition</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let inquiry of filteredInquiries; let i = index" 
+                [class.even]="i % 2 === 0" 
+                [class.odd]="i % 2 === 1">
+              <td class="document-cell">
+                <span class="document-number">{{ inquiry.vbeln }}</span>
+              </td>
+              <td class="type-cell">
+                <span class="type-badge" [class]="'type-' + inquiry.auart">
+                  {{ getDocumentTypeDescription(inquiry.auart) }}
+                </span>
+              </td>
+              <td class="date-cell">{{ inquiry.erdat }}</td>
+              <td class="user-cell">{{ inquiry.ernam }}</td>
+              <td class="value-cell">{{ formatCurrency(inquiry.netwr) }}</td>
+              <td class="customer-cell">{{ inquiry.kunnr }}</td>
+              <td class="condition-cell">{{ inquiry.knumv }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- No Data State -->
+    <div *ngIf="!loading && !error && inquiries.length > 0 && filteredInquiries.length === 0" class="no-data-container">
+      <div class="no-data-icon">🔍</div>
+      <h3>No Records Match Your Filter</h3>
+      <p>Try adjusting your filter criteria to see more results</p>
+      <button class="clear-btn" (click)="clearFilters()">Clear Filters</button>
+    </div>
+
+    <!-- No Data State - No inquiries at all -->
+    <div *ngIf="!loading && !error && inquiries.length === 0" class="no-data-container">
+      <div class="no-data-icon">📋</div>
+      <h3>No Inquiry Data Found</h3>
+      <p>There are no inquiry records for customer {{ customerId }}</p>
+      <button class="refresh-btn" (click)="refreshData()">Refresh Data</button>
+    </div>
+
+    <!-- Data Summary -->
+    <div *ngIf="!loading && !error && filteredInquiries.length > 0" class="data-summary">
+      <div class="summary-cards">
+        <div class="summary-card">
+          <div class="summary-icon">📊</div>
+          <div class="summary-content">
+            <h4>Filtered Records</h4>
+            <p class="summary-number">{{ totalCount }}</p>
+            <p class="summary-subtitle">of {{ inquiries.length }} total</p>
+          </div>
+        </div>
+        
+        <div class="summary-card">
+          <div class="summary-icon">💰</div>
+          <div class="summary-content">
+            <h4>Filtered Value</h4>
+            <p class="summary-number">{{ formatCurrency(getFilteredTotalValue()) }}</p>
+            <p class="summary-subtitle">Total: {{ formatCurrency(getTotalValue()) }}</p>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-icon">🎯</div>
+          <div class="summary-content">
+            <h4>Customer ID</h4>
+            <p class="summary-number">{{ customerId }}</p>
+            <p class="summary-subtitle">Active filters: {{ getActiveFilterCount() }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

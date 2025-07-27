@@ -1,0 +1,246 @@
+<div class="delivery-container">
+  <header class="delivery-header">
+    <div class="header-content">
+      <button class="back-btn" (click)="goBack()">
+        <span class="back-icon">←</span>
+        Back to Dashboard
+      </button>
+      <h1>Delivery Data</h1>
+      <button class="refresh-btn" (click)="refreshData()" [disabled]="loading">
+        <span class="refresh-icon">🔄</span>
+        Refresh
+      </button>
+    </div>
+  </header>
+
+  <main class="delivery-main">
+    <div class="delivery-info">
+      <h2>Delivery Records for Customer: {{ customerId }}</h2>
+      <div class="info-actions">
+        <p class="total-count" *ngIf="!loading && !error">
+          Showing {{ totalCount }} of {{ deliveries.length }} records
+        </p>
+        <button class="filter-toggle-btn" (click)="toggleFilters()" *ngIf="!loading && !error && deliveries.length > 0">
+          <span class="filter-icon">🔍</span>
+          {{ showFilters ? 'Hide Filters' : 'Show Filters' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div *ngIf="showFilters && !loading && !error" class="filter-container">
+      <div class="filter-header">
+        <h3>Filter Options</h3>
+        <div class="filter-actions">
+          <button class="apply-btn" (click)="applyFilters()">Apply Filters</button>
+          <button class="clear-btn" (click)="clearFilters()">Clear All</button>
+        </div>
+      </div>
+      
+      <div class="filter-grid">
+        <!-- Delivery Document Filter -->
+        <div class="filter-group">
+          <label for="deliveryDocument">Delivery Document</label>
+          <input
+            type="text"
+            id="deliveryDocument"
+            [(ngModel)]="filters.deliveryDocument"
+            placeholder="Enter delivery document"
+            class="filter-input"
+            (input)="applyFilters()"
+          />
+        </div>
+
+        <!-- Delivery Type Filter -->
+        <div class="filter-group">
+          <label for="deliveryType">Delivery Type</label>
+          <select
+            id="deliveryType"
+            [(ngModel)]="filters.deliveryType"
+            class="filter-select"
+            (change)="applyFilters()"
+          >
+            <option value="">All Types</option>
+            <option *ngFor="let type of getUniqueDeliveryTypes()" [value]="type">
+              {{ getDeliveryTypeDescription(type) }} ({{ type }})
+            </option>
+          </select>
+        </div>
+
+        <!-- Shipping Point Filter -->
+        <div class="filter-group">
+          <label for="shippingPoint">Shipping Point</label>
+          <select
+            id="shippingPoint"
+            [(ngModel)]="filters.shippingPoint"
+            class="filter-select"
+            (change)="applyFilters()"
+          >
+            <option value="">All Shipping Points</option>
+            <option *ngFor="let point of getUniqueShippingPoints()" [value]="point">
+              {{ point }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Route Filter -->
+        <div class="filter-group">
+          <label for="route">Route</label>
+          <select
+            id="route"
+            [(ngModel)]="filters.route"
+            class="filter-select"
+            (change)="applyFilters()"
+          >
+            <option value="">All Routes</option>
+            <option *ngFor="let route of getUniqueRoutes()" [value]="route">
+              {{ route }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Storage Location Filter -->
+        <div class="filter-group">
+          <label for="storageLocation">Storage Location</label>
+          <select
+            id="storageLocation"
+            [(ngModel)]="filters.storageLocation"
+            class="filter-select"
+            (change)="applyFilters()"
+          >
+            <option value="">All Locations</option>
+            <option *ngFor="let location of getUniqueStorageLocations()" [value]="location">
+              {{ location }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Sales Unit Filter -->
+        <div class="filter-group">
+          <label for="salesUnit">Sales Unit</label>
+          <input
+            type="text"
+            id="salesUnit"
+            [(ngModel)]="filters.salesUnit"
+            placeholder="Enter sales unit"
+            class="filter-input"
+            (input)="applyFilters()"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading delivery data from SAP...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error && !loading" class="error-container">
+      <div class="error-icon">⚠️</div>
+      <h3>Error Loading Delivery Data</h3>
+      <p>{{ error }}</p>
+      <button class="retry-btn" (click)="refreshData()">Try Again</button>
+    </div>
+
+    <!-- Data Table -->
+    <div *ngIf="!loading && !error && filteredDeliveries.length > 0" class="table-container">
+      <div class="table-responsive">
+        <table class="delivery-table">
+          <thead>
+            <tr>
+              <th>Delivery Document</th>
+              <th>Creation Date</th>
+              <th>Delivery Type</th>
+              <th>Shipping Point</th>
+              <th>Route</th>
+              <th>Delivered Qty</th>
+              <th>Sales Unit</th>
+              <th>Storage Location</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let delivery of filteredDeliveries; let i = index" 
+                [class.even]="i % 2 === 0" 
+                [class.odd]="i % 2 === 1">
+              <td class="document-cell">
+                <span class="document-number">{{ delivery.vbeln }}</span>
+              </td>
+              <td class="date-cell">{{ formatDate(delivery.erdat) }}</td>
+              <td class="type-cell">
+                <span class="type-badge" [class]="'type-' + delivery.lfart">
+                  {{ getDeliveryTypeDescription(delivery.lfart) }}
+                </span>
+              </td>
+              <td class="point-cell">{{ delivery.vstel }}</td>
+              <td class="route-cell">{{ delivery.route }}</td>
+              <td class="quantity-cell">
+                <span class="quantity-value">{{ delivery.lfimg }}</span>
+              </td>
+              <td class="unit-cell">{{ delivery.vrkme }}</td>
+              <td class="location-cell">{{ delivery.lgort }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- No Data State - No matching filters -->
+    <div *ngIf="!loading && !error && deliveries.length > 0 && filteredDeliveries.length === 0" class="no-data-container">
+      <div class="no-data-icon">🔍</div>
+      <h3>No Records Match Your Filter</h3>
+      <p>Try adjusting your filter criteria to see more results</p>
+      <button class="clear-btn" (click)="clearFilters()">Clear Filters</button>
+    </div>
+
+    <!-- No Data State - No deliveries at all -->
+    <div *ngIf="!loading && !error && deliveries.length === 0" class="no-data-container">
+      <div class="no-data-icon">🚚</div>
+      <h3>No Delivery Data Found</h3>
+      <p>There are no delivery records for customer {{ customerId }}</p>
+      <button class="refresh-btn" (click)="refreshData()">Refresh Data</button>
+    </div>
+
+    <!-- Data Summary -->
+    <div *ngIf="!loading && !error && filteredDeliveries.length > 0" class="data-summary">
+      <div class="summary-cards">
+        <div class="summary-card">
+          <div class="summary-icon">📊</div>
+          <div class="summary-content">
+            <h4>Filtered Records</h4>
+            <p class="summary-number">{{ totalCount }}</p>
+            <p class="summary-subtitle">of {{ deliveries.length }} total</p>
+          </div>
+        </div>
+        
+        <div class="summary-card">
+          <div class="summary-icon">✅</div>
+          <div class="summary-content">
+            <h4>Active Deliveries</h4>
+            <p class="summary-number">{{ getActiveDeliveryCount() }}</p>
+            <p class="summary-subtitle">Currently active</p>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-icon">📦</div>
+          <div class="summary-content">
+            <h4>Total Quantity</h4>
+            <p class="summary-number">{{ getTotalDeliveredQuantity() | number:'1.0-2' }}</p>
+            <p class="summary-subtitle">Delivered quantity</p>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-icon">🎯</div>
+          <div class="summary-content">
+            <h4>Customer ID</h4>
+            <p class="summary-number">{{ customerId }}</p>
+            <p class="summary-subtitle">Active filters: {{ getActiveFilterCount() }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

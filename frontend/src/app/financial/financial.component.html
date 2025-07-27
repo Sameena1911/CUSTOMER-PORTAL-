@@ -1,0 +1,437 @@
+<div class="financial-container">
+  <header class="financial-header">
+    <div class="header-content">
+      <button class="back-btn" (click)="goBack()">
+        <span class="back-icon">←</span>
+        Back to Dashboard
+      </button>
+      <h1>Customer Financial Sheet</h1>
+      <button class="refresh-btn" (click)="refreshData()" [disabled]="loading">
+        <span class="refresh-icon">🔄</span>
+        Refresh
+      </button>
+    </div>
+  </header>
+
+  <main class="financial-main">
+    <!-- Customer Info and Navigation Tabs -->
+    <div class="financial-info">
+      <h2>Financial Overview for Customer: {{ customerId }}</h2>
+      <div class="tab-navigation">
+        <button 
+          class="tab-btn" 
+          [class.active]="activeTab === 'overview'"
+          (click)="setActiveTab('overview')">
+          📊 Overall Sales Data
+        </button>
+        <button 
+          class="tab-btn" 
+          [class.active]="activeTab === 'invoices'"
+          (click)="setActiveTab('invoices')">
+          📄 Invoices
+        </button>
+        <button 
+          class="tab-btn" 
+          [class.active]="activeTab === 'payments'"
+          (click)="setActiveTab('payments')">
+          💰 Payments
+        </button>
+        <button 
+          class="tab-btn" 
+          [class.active]="activeTab === 'memos'"
+          (click)="setActiveTab('memos')">
+          📝 Credit/Debit Memos
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading financial data...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error && !loading" class="error-container">
+      <div class="error-icon">⚠️</div>
+      <h3>Error Loading Data</h3>
+      <p>{{ error }}</p>
+      <button class="retry-btn" (click)="refreshData()">Retry</button>
+    </div>
+
+    <!-- Overall Sales Data Tab -->
+    <div *ngIf="activeTab === 'overview' && !loading && !error" class="overview-content">
+      <!-- Sales Summary Cards -->
+      <div class="sales-breakdown">
+        <h3>📈 Sales Breakdown by Document Type</h3>
+        <div class="breakdown-cards">
+          <div class="breakdown-card">
+            <div class="card-icon">💰</div>
+            <div class="card-content">
+              <h4>Total Sales Amount</h4>
+              <p class="amount">{{ getFilteredTransactionsTotalAmount() | number:'1.2-2' }} SAR</p>
+              <span class="subtitle">All Transactions</span>
+            </div>
+          </div>
+          
+          <div class="breakdown-card">
+            <div class="card-icon">📊</div>
+            <div class="card-content">
+              <h4>Total Transactions</h4>
+              <p class="amount">{{ filteredOverallSalesTransactions.length }}</p>
+              <span class="subtitle">Document Count</span>
+            </div>
+          </div>
+          
+          <div class="breakdown-card">
+            <div class="card-icon">📈</div>
+            <div class="card-content">
+              <h4>Average Invoice Value</h4>
+              <p class="amount">{{ getAverageTransactionAmount() | number:'1.2-2' }} SAR</p>
+              <span class="subtitle">Per Transaction</span>
+            </div>
+          </div>
+          
+          <div class="breakdown-card">
+            <div class="card-icon">🏷️</div>
+            <div class="card-content">
+              <h4>Document Types</h4>
+              <p class="amount">{{ getUniqueDocumentTypes().length }}</p>
+              <span class="subtitle">Unique Types</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overall Sales Filters -->
+      <div class="filter-section">
+        <h3>🔍 Filter Overall Sales Data</h3>
+        <div class="filter-grid">
+          <div class="filter-group">
+            <label for="overallDocumentType">Document Type:</label>
+            <select id="overallDocumentType" [(ngModel)]="overallSalesFilters.documentType" (change)="applyOverallSalesFilters()">
+              <option value="">All Types</option>
+              <option *ngFor="let type of getUniqueDocumentTypes()" [value]="type">
+                {{ getDocumentTypeName(type) }}
+              </option>
+            </select>
+          </div>
+          
+          <div class="filter-group">
+            <label for="overallDateFrom">Date From:</label>
+            <input type="date" id="overallDateFrom" [(ngModel)]="overallSalesFilters.dateFrom" (change)="applyOverallSalesFilters()">
+          </div>
+          
+          <div class="filter-group">
+            <label for="overallDateTo">Date To:</label>
+            <input type="date" id="overallDateTo" [(ngModel)]="overallSalesFilters.dateTo" (change)="applyOverallSalesFilters()">
+          </div>
+          
+          <div class="filter-group">
+            <label for="overallAmountMin">Min Amount:</label>
+            <input type="number" id="overallAmountMin" [(ngModel)]="overallSalesFilters.amountMin" (input)="applyOverallSalesFilters()" placeholder="0">
+          </div>
+          
+          <div class="filter-group">
+            <label for="overallAmountMax">Max Amount:</label>
+            <input type="number" id="overallAmountMax" [(ngModel)]="overallSalesFilters.amountMax" (input)="applyOverallSalesFilters()" placeholder="No limit">
+          </div>
+          
+          <div class="filter-group">
+            <label for="overallDescription">Description:</label>
+            <input type="text" id="overallDescription" [(ngModel)]="overallSalesFilters.description" (input)="applyOverallSalesFilters()" placeholder="Search description...">
+          </div>
+        </div>
+        
+        <div class="filter-actions">
+          <button class="clear-filters-btn" (click)="clearOverallSalesFilters()">Clear Filters</button>
+          <span class="results-count">Showing {{ filteredOverallSalesTransactions.length }} results</span>
+        </div>
+      </div>
+
+      <!-- Overall Sales Data Table -->
+      <div class="data-table-container">
+        <h3>📋 Transaction Details</h3>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Document Number</th>
+                <th>Document Type</th>
+                <th>Date</th>
+                <th>Amount (SAR)</th>
+                <th>Description</th>
+                <th>Currency</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let transaction of paginatedOverallSalesTransactions">
+                <td>{{ transaction.vbeln }}</td>
+                <td>
+                  <span class="document-type-badge" [attr.data-type]="transaction.fkart">
+                    {{ getDocumentTypeName(transaction.fkart) }}
+                  </span>
+                </td>
+                <td>{{ transaction.fkdat | date:'mediumDate' }}</td>
+                <td class="amount-cell">{{ transaction.netwr | number:'1.2-2' }}</td>
+                <td class="description-cell">{{ transaction.description }}</td>
+                <td>{{ transaction.waerk }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-container" *ngIf="totalPages > 1">
+          <button class="pagination-btn" (click)="previousPage()" [disabled]="currentPage === 1">
+            ← Previous
+          </button>
+          
+          <div class="pagination-info">
+            <span *ngFor="let page of getPaginationRange()" class="pagination-number">
+              <button 
+                *ngIf="isPageNumber(page)" 
+                [class.active]="page === currentPage"
+                (click)="goToPage(page)"
+                class="page-btn">
+                {{ page }}
+              </button>
+              <span *ngIf="!isPageNumber(page)" class="pagination-ellipsis">{{ page }}</span>
+            </span>
+          </div>
+          
+          <button class="pagination-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">
+            Next →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Invoices Tab -->
+    <div *ngIf="activeTab === 'invoices' && !loading && !error" class="invoices-content">
+      <!-- Invoice Filters -->
+      <div class="filter-section">
+        <h3>🔍 Filter Invoices</h3>
+        <div class="filter-grid">
+          <div class="filter-group">
+            <label for="invoiceStatus">Status:</label>
+            <select id="invoiceStatus" [(ngModel)]="invoiceFilters.status" (change)="applyInvoiceFilters()">
+              <option value="">All Statuses</option>
+              <option value="Paid">Paid</option>
+              <option value="Pending">Pending</option>
+              <option value="Overdue">Overdue</option>
+            </select>
+          </div>
+          
+          <div class="filter-group">
+            <label for="invoiceDateFrom">Date From:</label>
+            <input type="date" id="invoiceDateFrom" [(ngModel)]="invoiceFilters.dateFrom" (change)="applyInvoiceFilters()">
+          </div>
+          
+          <div class="filter-group">
+            <label for="invoiceDateTo">Date To:</label>
+            <input type="date" id="invoiceDateTo" [(ngModel)]="invoiceFilters.dateTo" (change)="applyInvoiceFilters()">
+          </div>
+          
+          <div class="filter-group">
+            <label for="invoiceAmountMin">Min Amount:</label>
+            <input type="number" id="invoiceAmountMin" [(ngModel)]="invoiceFilters.amountMin" (input)="applyInvoiceFilters()" placeholder="0">
+          </div>
+          
+          <div class="filter-group">
+            <label for="invoiceAmountMax">Max Amount:</label>
+            <input type="number" id="invoiceAmountMax" [(ngModel)]="invoiceFilters.amountMax" (input)="applyInvoiceFilters()" placeholder="No limit">
+          </div>
+        </div>
+        
+        <div class="filter-actions">
+          <button class="clear-filters-btn" (click)="clearInvoiceFilters()">Clear Filters</button>
+          <span class="results-count">Showing {{ filteredInvoices.length }} invoices</span>
+        </div>
+      </div>
+
+      <!-- Invoices Table -->
+      <div class="data-table-container">
+        <h3>📄 Invoice Details</h3>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Invoice Number</th>
+                <th>Invoice Date</th>
+                <th>Due Date</th>
+                <th>Amount (SAR)</th>
+                <th>Status</th>
+                <th>Description</th>
+                <th>Document Name</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let invoice of filteredInvoices">
+                <td>{{ invoice.invoiceNumber }}</td>
+                <td>{{ invoice.invoiceDate | date:'mediumDate' }}</td>
+                <td>{{ invoice.dueDate | date:'mediumDate' }}</td>
+                <td class="amount-cell">{{ invoice.amount | number:'1.2-2' }}</td>
+                <td>
+                  <span class="status-badge" [attr.data-status]="invoice.status">
+                    {{ invoice.status }}
+                  </span>
+                </td>
+                <td class="description-cell">{{ invoice.description }}</td>
+                <td class="document-cell">{{ invoice.documentName || 'Invoice_' + invoice.invoiceNumber + '.pdf' }}</td>
+                <td class="actions-cell">
+                  <button class="action-btn view-btn" (click)="viewInvoice(invoice.invoiceNumber)" title="View Invoice">
+                    👁️ View
+                  </button>
+                  <button class="action-btn download-btn" (click)="downloadInvoice(invoice.invoiceNumber)" title="Download Invoice">
+                    💾 Download
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payments Tab -->
+    <div *ngIf="activeTab === 'payments' && !loading && !error" class="payments-content">
+      <!-- Payments Table -->
+      <div class="data-table-container">
+        <h3>💰 Payment Aging Details</h3>
+        <div class="results-info">
+          <span class="results-count">Showing {{ filteredPayments.length }} entries</span>
+        </div>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Document No.</th>
+                <th>Billing Date</th>
+                <th>Due Date</th>
+                <th>Amount</th>
+                <th>Currency</th>
+                <th>Aging Days</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let payment of filteredPayments">
+                <td>{{ payment.kunnr || payment.paymentId || 'N/A' }}</td>
+                <td>{{ payment.vbeln || payment.invoiceNumber || 'N/A' }}</td>
+                <td>{{ payment.fkdat || payment.billingDate | date:'dd.MM.yyyy' }}</td>
+                <td>{{ payment.due_date || payment.dueDate | date:'dd.MM.yyyy' }}</td>
+                <td class="amount-cell">{{ (payment.netwr || payment.amount || 0) | number:'1.2-2' }}</td>
+                <td>{{ payment.waerk || payment.currency || 'EUR' }}</td>
+                <td>
+                  <span class="aging-badge" [attr.data-aging]="getAgingClass(payment.ageing_days || payment.agingDays || 0)">
+                    {{ payment.ageing_days || payment.agingDays || 0 }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Credit/Debit Memos Tab -->
+    <div *ngIf="activeTab === 'memos' && !loading && !error" class="memos-content">
+      <!-- Memo Type Toggle -->
+      <div class="memo-toggle-section">
+        <h3>📝 Credit/Debit Memos</h3>
+        <div class="toggle-buttons">
+          <button 
+            class="toggle-btn" 
+            [class.active]="showCreditMemos"
+            (click)="toggleMemoType(true)">
+            💳 Credit Memos
+          </button>
+          <button 
+            class="toggle-btn" 
+            [class.active]="!showCreditMemos"
+            (click)="toggleMemoType(false)">
+            💸 Debit Memos
+          </button>
+        </div>
+      </div>
+
+      <!-- Memo Filters -->
+      <div class="filter-section">
+        <h3>🔍 Filter {{ showCreditMemos ? 'Credit' : 'Debit' }} Memos</h3>
+        <div class="filter-grid">
+          <div class="filter-group">
+            <label for="memoDateFrom">Date From:</label>
+            <input type="date" id="memoDateFrom" [(ngModel)]="memoFilters.dateFrom" (change)="applyMemoFilters()">
+          </div>
+          
+          <div class="filter-group">
+            <label for="memoDateTo">Date To:</label>
+            <input type="date" id="memoDateTo" [(ngModel)]="memoFilters.dateTo" (change)="applyMemoFilters()">
+          </div>
+          
+          <div class="filter-group">
+            <label for="memoAmountMin">Min Amount:</label>
+            <input type="number" id="memoAmountMin" [(ngModel)]="memoFilters.amountMin" (input)="applyMemoFilters()" placeholder="0">
+          </div>
+          
+          <div class="filter-group">
+            <label for="memoAmountMax">Max Amount:</label>
+            <input type="number" id="memoAmountMax" [(ngModel)]="memoFilters.amountMax" (input)="applyMemoFilters()" placeholder="No limit">
+          </div>
+        </div>
+        
+        <div class="filter-actions">
+          <button class="clear-filters-btn" (click)="clearMemoFilters()">Clear Filters</button>
+          <span class="results-count">Showing {{ filteredMemos.length }} {{ showCreditMemos ? 'credit' : 'debit' }} memos</span>
+        </div>
+      </div>
+
+      <!-- Memos Table -->
+      <div class="data-table-container">
+        <h3>📋 {{ showCreditMemos ? 'Credit' : 'Debit' }} Memo Details</h3>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Memo Number</th>
+                <th>Memo Date</th>
+                <th>Type</th>
+                <th>Amount (SAR)</th>
+                <th>Reason</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let memo of filteredMemos">
+                <td>{{ memo.vbeln }}</td>
+                <td>{{ memo.fkdat | date:'mediumDate' }}</td>
+                <td>
+                  <span class="memo-type-badge" [attr.data-type]="memo.fkart">
+                    {{ getDocumentTypeName(memo.fkart) }}
+                  </span>
+                </td>
+                <td class="amount-cell">{{ memo.netwr | number:'1.2-2' }}</td>
+                <td class="description-cell">{{ memo.description }}</td>
+                <td>
+                  <span class="status-badge" [attr.data-status]="'Active'">
+                    Active
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Data State -->
+    <!-- <div *ngIf="!loading && !error && financialData.invoices.length === 0" class="no-data-container">
+      <div class="no-data-icon">💰</div>
+      <h3>No Financial Data Found</h3>
+      <p>There are no financial records for customer {{ customerId }}</p>
+      <button class="refresh-btn" (click)="refreshData()">Refresh Data</button>
+    </div> -->
+  </main>
+</div>
