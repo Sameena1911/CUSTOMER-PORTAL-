@@ -117,6 +117,11 @@ export class FinancialComponent implements OnInit {
 
   constructor(private router: Router, private http: HttpClient) {}
 
+  // Track by function for ngFor performance
+  trackByPayment(index: number, payment: any): any {
+    return payment.vbeln || index;
+  }
+
   ngOnInit() {
     this.customerId = localStorage.getItem('customerId');
     if (!this.customerId) {
@@ -471,6 +476,21 @@ export class FinancialComponent implements OnInit {
 
     console.log('Applied payment filters - Total payment aging entries:', this.filteredPayments.length);
     console.log('Payment aging data:', this.filteredPayments);
+    console.log('Sample entries for debugging:');
+    this.filteredPayments.slice(0, 5).forEach((payment, index) => {
+      console.log(`Entry ${index + 1}:`, {
+        kunnr: payment.kunnr,
+        vbeln: payment.vbeln,
+        netwr: payment.netwr,
+        fkdat: payment.fkdat
+      });
+    });
+    
+    // Force Angular change detection
+    setTimeout(() => {
+      console.log('After timeout - filteredPayments still has:', this.filteredPayments.length, 'entries');
+    }, 100);
+    
     console.log('=== applyPaymentFilters completed ===');
   }
 

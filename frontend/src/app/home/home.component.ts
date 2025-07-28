@@ -214,41 +214,44 @@ export class HomeComponent implements OnInit {
 
     this.financialStats.loading = true;
 
-    this.http.get<any>(`http://localhost:3000/api/customer/financial/${this.customerId}`)
+    // Use payment aging endpoint to get real financial data
+    this.http.get<any>(`http://localhost:3000/api/customer/payment-aging/${this.customerId}`)
       .subscribe({
         next: (response) => {
           this.financialStats.loading = false;
-          if (response.success && response.data) {
-            // Calculate total outstanding from invoices
+          if (response.success && response.paymentAging && response.paymentAging.length > 0) {
             let totalOutstanding = 0;
             let overdueCount = 0;
+            const currentDate = new Date();
 
-            if (response.data.invoices && response.data.invoices.length > 0) {
-              const currentDate = new Date();
-              response.data.invoices.forEach((invoice: any) => {
-                if (invoice.status === 'Open') {
-                  totalOutstanding += parseFloat(invoice.amount) || 0;
-                  
-                  // Check if overdue (assuming 30 days payment term)
-                  if (invoice.invoiceDate) {
-                    const invoiceDate = new Date(invoice.invoiceDate);
-                    const daysDiff = Math.floor((currentDate.getTime() - invoiceDate.getTime()) / (1000 * 3600 * 24));
-                    if (daysDiff > 30) {
-                      overdueCount++;
-                    }
-                  }
-                }
-              });
-            }
+            response.paymentAging.forEach((item: any) => {
+              // Parse outstanding amount
+              const amount = parseFloat(item.dmbtr) || 0;
+              totalOutstanding += amount;
+
+              // Check if overdue based on aging buckets
+              // If any amount is in aging buckets (bucket1, bucket2, etc.), it's overdue
+              const bucket1 = parseFloat(item.bucket1) || 0;
+              const bucket2 = parseFloat(item.bucket2) || 0;
+              const bucket3 = parseFloat(item.bucket3) || 0;
+              const bucket4 = parseFloat(item.bucket4) || 0;
+
+              if (bucket1 > 0 || bucket2 > 0 || bucket3 > 0 || bucket4 > 0) {
+                overdueCount++;
+              }
+            });
 
             this.financialStats = {
-              totalOutstanding: totalOutstanding.toFixed(2),
+              totalOutstanding: totalOutstanding.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              }),
               overdueCount: overdueCount,
               loading: false
             };
           } else {
             this.financialStats = {
-              totalOutstanding: '0',
+              totalOutstanding: '0.00',
               overdueCount: 0,
               loading: false
             };
@@ -257,7 +260,7 @@ export class HomeComponent implements OnInit {
         error: (error) => {
           console.error('Error loading financial stats:', error);
           this.financialStats = {
-            totalOutstanding: '0',
+            totalOutstanding: '0.00',
             overdueCount: 0,
             loading: false
           };

@@ -14,6 +14,7 @@ import { CommonModule } from '@angular/common';
 export class LoginComponent {
   loginForm: FormGroup;
   loading = false;
+  showPassword = false;
 
   constructor(
     private router: Router,
@@ -24,6 +25,10 @@ export class LoginComponent {
       cust_id: ['', Validators.required],
       password: ['', Validators.required]
     });
+  }
+
+  togglePassword() {
+    this.showPassword = !this.showPassword;
   }
 
   onLogin() {

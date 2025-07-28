@@ -67,7 +67,9 @@ router.get('/payment-aging/:customerId', async (req, res) => {
 
         if (sapResponse && sapResponse[0] && sapResponse[0]['EV_PAYAGE']) {
           const payageData = sapResponse[0]['EV_PAYAGE'][0];
-          const parsedData = parsePaymentAgingData(payageData);
+          const parsedData = parsePaymentAgingData(payageData, customerId);
+          
+          console.log('Parsed payment aging data:', parsedData.length, 'items');
           
           res.json({
             success: true,
@@ -76,14 +78,48 @@ router.get('/payment-aging/:customerId', async (req, res) => {
             sapResponse: result
           });
         } else {
-          // Return mock data if SAP response is not in expected format
-          console.log('SAP response format unexpected, using mock data');
-          res.json({
-            success: true,
-            message: 'Payment aging data retrieved (mock data)',
-            data: getMockPaymentAgingData(customerId),
-            sapResponse: result
-          });
+          // Log the actual SAP response to understand the structure
+          console.log('SAP response structure:', JSON.stringify(sapResponse, null, 2));
+          
+          // Try different response structure patterns
+          let payageData = null;
+          let parsedData = [];
+          
+          // Check if the data is directly in the response
+          if (sapResponse && sapResponse[0]) {
+            // Sometimes the data might be directly in the response
+            const responseData = sapResponse[0];
+            
+            // Try to find payment aging data in different possible locations
+            if (responseData['EV_PAYAGE']) {
+              payageData = responseData['EV_PAYAGE'][0];
+              parsedData = parsePaymentAgingData(payageData, customerId);
+            } else if (responseData['PAYAGE_DATA']) {
+              payageData = responseData['PAYAGE_DATA'][0];
+              parsedData = parsePaymentAgingData(payageData, customerId);
+            } else if (responseData['item']) {
+              // Data might be directly as items
+              parsedData = parsePaymentAgingDataDirect(responseData, customerId);
+            }
+          }
+          
+          if (parsedData.length > 0) {
+            console.log('Successfully parsed data using alternative method:', parsedData.length, 'items');
+            res.json({
+              success: true,
+              message: 'Payment aging data retrieved successfully',
+              data: parsedData,
+              sapResponse: result
+            });
+          } else {
+            console.log('Could not parse SAP response, using mock data');
+            res.json({
+              success: true,
+              message: 'Payment aging data retrieved (mock data)',
+              data: getMockPaymentAgingData(customerId),
+              sapResponse: result
+            });
+          }
         }
       } catch (parseError) {
         console.error('Error parsing SAP response structure:', parseError);
@@ -110,15 +146,17 @@ router.get('/payment-aging/:customerId', async (req, res) => {
 });
 
 // Function to parse payment aging data from SAP response
-function parsePaymentAgingData(payageData) {
+function parsePaymentAgingData(payageData, customerId) {
   const paymentAgingList = [];
+
+  console.log('Parsing payage data:', JSON.stringify(payageData, null, 2));
 
   if (payageData && payageData['item']) {
     const items = Array.isArray(payageData['item']) ? payageData['item'] : [payageData['item']];
     
     items.forEach(item => {
       paymentAgingList.push({
-        kunnr: item['KUNNR'] ? item['KUNNR'][0] : 'N/A',
+        kunnr: customerId || (item['KUNNR'] ? item['KUNNR'][0] : customerId),
         vbeln: item['VBELN'] ? item['VBELN'][0] : 'N/A',
         fkdat: item['FKDAT'] ? formatSAPDate(item['FKDAT'][0]) : 'N/A',
         due_date: item['DUE_DATE'] ? formatSAPDate(item['DUE_DATE'][0]) : 'N/A',
@@ -137,6 +175,49 @@ function parsePaymentAgingData(payageData) {
     });
   }
 
+  console.log('Parsed payment aging items:', paymentAgingList.length);
+  return paymentAgingList;
+}
+
+// Alternative function to parse payment aging data when it's in different structure
+function parsePaymentAgingDataDirect(responseData, customerId) {
+  const paymentAgingList = [];
+
+  console.log('Parsing direct response data:', JSON.stringify(responseData, null, 2));
+
+  if (responseData && responseData['item']) {
+    const items = Array.isArray(responseData['item']) ? responseData['item'] : [responseData['item']];
+    
+    items.forEach(item => {
+      // Handle both nested array format and direct object format
+      const getValue = (field) => {
+        if (item[field]) {
+          return Array.isArray(item[field]) ? item[field][0] : item[field];
+        }
+        return null;
+      };
+
+      paymentAgingList.push({
+        kunnr: customerId || getValue('KUNNR') || getValue('kunnr') || customerId,
+        vbeln: getValue('VBELN') || getValue('vbeln') || 'N/A',
+        fkdat: formatSAPDate(getValue('FKDAT') || getValue('fkdat')) || 'N/A',
+        due_date: formatSAPDate(getValue('DUE_DATE') || getValue('due_date')) || 'N/A',
+        netwr: parseFloat(getValue('NETWR') || getValue('netwr')) || 0,
+        waerk: getValue('WAERK') || getValue('waerk') || 'EUR',
+        ageing_days: parseInt(getValue('AGEING_DAYS') || getValue('ageing_days')) || 0,
+        
+        // Legacy fields for backward compatibility
+        billingDate: formatSAPDate(getValue('FKDAT') || getValue('fkdat')) || 'N/A',
+        dueDate: formatSAPDate(getValue('DUE_DATE') || getValue('due_date')) || 'N/A',
+        amount: parseFloat(getValue('NETWR') || getValue('netwr')) || 0,
+        currency: getValue('WAERK') || getValue('waerk') || 'EUR',
+        agingDays: parseInt(getValue('AGEING_DAYS') || getValue('ageing_days')) || 0,
+        status: getPaymentStatus(parseInt(getValue('AGEING_DAYS') || getValue('ageing_days')) || 0)
+      });
+    });
+  }
+
+  console.log('Parsed direct payment aging items:', paymentAgingList.length);
   return paymentAgingList;
 }
 
@@ -144,11 +225,39 @@ function parsePaymentAgingData(payageData) {
 function formatSAPDate(sapDate) {
   if (!sapDate || sapDate === '00000000') return 'N/A';
   
-  const year = sapDate.substring(0, 4);
-  const month = sapDate.substring(4, 6);
-  const day = sapDate.substring(6, 8);
-  
-  return `${year}-${month}-${day}`;
+  try {
+    // Handle various SAP date formats
+    let dateStr = String(sapDate).replace(/\D/g, ''); // Remove non-digits
+    
+    if (dateStr.length === 8) {
+      // Standard SAP format: YYYYMMDD
+      const year = dateStr.substring(0, 4);
+      const month = dateStr.substring(4, 6);
+      const day = dateStr.substring(6, 8);
+      
+      // Validate the date
+      const date = new Date(year, month - 1, day);
+      if (date.getFullYear() == year && date.getMonth() == month - 1 && date.getDate() == day) {
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      }
+    }
+    
+    // If we can't parse it properly, try to create a valid date
+    if (dateStr.length >= 6) {
+      const year = dateStr.substring(0, 4);
+      const month = dateStr.substring(4, 6) || '01';
+      const day = dateStr.substring(6, 8) || '01';
+      
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    }
+    
+    // If all else fails, return current date formatted
+    const now = new Date();
+    return `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`;
+  } catch (error) {
+    console.error('Error formatting SAP date:', sapDate, error);
+    return 'N/A';
+  }
 }
 
 // Function to determine payment status based on aging days

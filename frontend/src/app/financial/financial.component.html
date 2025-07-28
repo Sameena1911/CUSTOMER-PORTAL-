@@ -317,7 +317,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let payment of filteredPayments">
+              <tr *ngFor="let payment of filteredPayments; trackBy: trackByPayment">
                 <td>{{ payment.kunnr || payment.paymentId || 'N/A' }}</td>
                 <td>{{ payment.vbeln || payment.invoiceNumber || 'N/A' }}</td>
                 <td>{{ payment.fkdat || payment.billingDate | date:'dd.MM.yyyy' }}</td>

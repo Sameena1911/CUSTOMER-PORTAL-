@@ -1,6 +1,6 @@
 <div class="home-container">
   <header class="header">
-    <h1>Customer Portal Dashboard</h1>
+    <h1>Customer Portal </h1>
     <div class="user-info">
       <span *ngIf="!profileLoading && profile">Welcome, {{ profile.name1 || profile.customerName || 'Customer' }}!</span>
       <span *ngIf="profileLoading">Welcome, Customer!</span>
@@ -154,12 +154,12 @@
             <p>View invoices, payments, aging, and financial summary</p>
             <div class="stats" *ngIf="!financialStats.loading">
               <div class="stat-item">
-                <span class="stat-number">{{ financialStats.totalOutstanding || '0' }}</span>
+                <span class="stat-number financial-amount">₹{{ financialStats.totalOutstanding }}</span>
                 <span class="stat-label">Outstanding</span>
               </div>
               <div class="stat-item">
-                <span class="stat-number">{{ financialStats.overdueCount || '0' }}</span>
-                <span class="stat-label">Overdue</span>
+                <span class="stat-number overdue-count">{{ financialStats.overdueCount }}</span>
+                <span class="stat-label">Overdue Items</span>
               </div>
             </div>
             <div class="stats loading-stats" *ngIf="financialStats.loading">
