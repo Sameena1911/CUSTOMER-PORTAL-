@@ -13,11 +13,13 @@
   --text-primary: #333333;
   --text-secondary: #666666;
   --text-light: #999999;
-  --background-light: #fafafa;
+  --background-light: #ffffff;
   --background-white: #ffffff;
-  --border-color: #e1e5e9;
+  --border-color: rgba(240, 77, 98, 0.2);
   --shadow-light: rgba(240, 77, 98, 0.15);
   --shadow-medium: rgba(240, 77, 98, 0.25);
+  --gradient-primary: linear-gradient(135deg, #ffffff 0%, #f8f9fa 50%, #f04d62 100%);
+  --gradient-card: linear-gradient(135deg, #f04d62 0%, #e63946 100%);
 }
 
 * {
@@ -28,7 +30,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   color: var(--text-primary);
   line-height: 1.6;
   min-height: 100vh;

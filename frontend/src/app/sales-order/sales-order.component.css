@@ -1,7 +1,7 @@
 /* Sales Order Container */
 .sales-order-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 50%, #f04d62 100%);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -28,12 +28,13 @@
   margin: 0;
   font-size: 1.8rem;
   font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   flex: 1;
   text-align: center;
 }
 
 .back-btn, .refresh-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #f04d62;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -228,7 +229,7 @@
 
 .filter-input:focus, .filter-select:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #f04d62;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -247,7 +248,7 @@
   width: 50px;
   height: 50px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #667eea;
+  border-top: 4px solid #f04d62;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 1rem auto;
@@ -293,7 +294,7 @@
 }
 
 .retry-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #f04d62;
   color: white;
   border: none;
   padding: 0.75rem 2rem;
@@ -332,7 +333,7 @@
 }
 
 .sales-order-table th {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #f04d62;
   color: white;
   padding: 1rem 0.75rem;
   text-align: left;
@@ -369,7 +370,7 @@
 }
 
 .document-number {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #f04d62;
   color: white;
   padding: 0.3rem 0.6rem;
   border-radius: 6px;
@@ -397,7 +398,7 @@
 }
 
 .type-badge.type-ZOR {
-  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  background:#f04d62;
   color: white;
 }
 
@@ -407,7 +408,7 @@
 }
 
 .type-badge.type-ZS1 {
-  background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
+  background: #f04d62;
   color: white;
 }
 
@@ -476,7 +477,7 @@
 }
 
 .summary-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #f04d62;
   color: white;
   padding: 1.5rem;
   border-radius: 12px;

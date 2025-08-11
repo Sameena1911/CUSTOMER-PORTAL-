@@ -1,7 +1,7 @@
 .home-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 25%, #0f3460 50%, #f04d62 100%);
-  color: white;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 25%, #f04d62 100%);
+  color: #333;
   position: relative;
   overflow-x: hidden;
 }
@@ -25,10 +25,10 @@
   justify-content: space-between;
   align-items: center;
   padding: 20px 40px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(240, 77, 98, 0.2);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 30px rgba(240, 77, 98, 0.1);
   position: relative;
   z-index: 10;
 }
@@ -37,13 +37,15 @@
   margin: 0;
   font-size: 2rem;
   font-weight: bold;
-  color: white;
+  color: #f04d62;
+  text-shadow: 0 2px 10px rgba(240, 77, 98, 0.2);
 }
 
 .user-info {
   display: flex;
   align-items: center;
   gap: 15px;
+  color: #333;
 }
 
 .logout-btn {
@@ -86,19 +88,27 @@
 
 .dashboard {
   padding: 40px;
-  color: white;
+  color: #333;
+  background: rgba(255, 255, 255, 0.9);
+  margin: 20px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 40px rgba(240, 77, 98, 0.1);
 }
 
 .welcome-section {
   text-align: center;
   margin-bottom: 40px;
+  color: #333;
 }
 
 .welcome-section h2 {
   font-size: 2.5rem;
   margin-bottom: 10px;
+  color: #f04d62;
+  font-weight: 700;
   font-weight: 300;
-  color: white;
+  color: black;
 }
 
 .welcome-section p {
@@ -187,9 +197,12 @@
   font-size: 2rem;
   margin-bottom: 30px;
   text-align: center;
-  font-weight: 300;
-  color: #fff;
+  font-weight: 700;
+  color: #f04d62;
+  text-shadow: 0 2px 10px rgba(240, 77, 98, 0.2);
 }
+  
+
 
 /* Sales Dashboard */
 .sales-dashboard {
@@ -221,7 +234,9 @@
 .card-header h3 {
   margin: 0;
   font-size: 1.4rem;
-  color: #fff;
+  color: #f04d62;
+  font-weight: 600;
+  text-shadow: 0 2px 10px rgba(240, 77, 98, 0.2);
 }
 
 /* Quick Actions */
@@ -246,18 +261,20 @@
 .action-card h4 {
   margin: 15px 0 10px 0;
   font-size: 1.2rem;
-  color: #fff;
+  color: #f04d62;
+  font-weight: 600;
 }
 
 .action-card p {
   margin: 0;
   font-size: 0.9rem;
   opacity: 0.8;
+  color: #666;
 }
 
 /* Card Base Styles */
 .card {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border-radius: 25px;
   border: 1px solid rgba(240, 77, 98, 0.2);
@@ -265,7 +282,8 @@
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 40px rgba(240, 77, 98, 0.15);
+  color: #333;
 }
 
 .card::before {
@@ -283,8 +301,8 @@
 
 .card:hover {
   transform: translateY(-15px);
-  box-shadow: 0 25px 60px rgba(240, 77, 98, 0.2);
-  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 25px 60px rgba(240, 77, 98, 0.3);
+  background: rgba(255, 255, 255, 1);
   border-color: rgba(240, 77, 98, 0.4);
 }
 
@@ -305,25 +323,26 @@
   backdrop-filter: blur(10px);
   border: 1px solid rgba(240, 77, 98, 0.3);
   transition: all 0.3s ease;
+  color: white;
 }
 
 .inquiry-icon {
-  background: linear-gradient(135deg, #f04d62 0%, #4facfe 100%);
+  background: linear-gradient(135deg, #f04d62 0%, #ff6b7d 100%);
   box-shadow: 0 8px 25px rgba(240, 77, 98, 0.3);
 }
 
 .order-icon {
-  background: linear-gradient(135deg, #f04d62 0%, #43e97b 100%);
+  background: linear-gradient(135deg, #f04d62 0%, #ff8a95 100%);
   box-shadow: 0 8px 25px rgba(240, 77, 98, 0.3);
 }
 
 .delivery-icon {
-  background: linear-gradient(135deg, #f04d62 0%, #fee140 100%);
+  background: linear-gradient(135deg, #f04d62 0%, #ff5722 100%);
   box-shadow: 0 8px 25px rgba(240, 77, 98, 0.3);
 }
 
 .financial-icon {
-  background: linear-gradient(135deg, #f04d62 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #f04d62 0%, #e63946 100%);
   box-shadow: 0 8px 25px rgba(240, 77, 98, 0.3);
 }
 
@@ -333,7 +352,7 @@
   justify-content: space-between;
   margin: 20px 0;
   padding: 15px 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid rgba(240, 77, 98, 0.2);
 }
 
 .stat-item {
@@ -345,8 +364,9 @@
   display: block;
   font-size: 2rem;
   font-weight: bold;
-  color: #fff;
+  color: #f04d62;
   margin-bottom: 5px;
+  text-shadow: 0 2px 10px rgba(240, 77, 98, 0.2);
 }
 
 /* Financial amount styling */
@@ -364,6 +384,7 @@
 .stat-label {
   font-size: 0.9rem;
   opacity: 0.8;
+  color: #666;
 }
 
 /* Loading states */
@@ -373,6 +394,7 @@
 
 .loading-text {
   animation: pulse 1.5s ease-in-out infinite;
+  color: #f04d62 !important;
 }
 
 @keyframes pulse {
@@ -393,13 +415,15 @@
 .card-content h3 {
   font-size: 1.5rem;
   margin-bottom: 15px;
-  color: #fff;
+  color: #333;
+  font-weight: 600;
 }
 
 .card-content p {
   margin-bottom: 20px;
-  opacity: 0.9;
+  opacity: 0.8;
   line-height: 1.6;
+  color: #666;
 }
 
 /* Buttons */

@@ -1,7 +1,7 @@
 /* Financial Container */
 .financial-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 50%, #f04d62 100%);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -30,6 +30,7 @@
   font-weight: 600;
   flex: 1;
   text-align: center;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .back-btn, .refresh-btn {
@@ -182,7 +183,7 @@
   width: 50px;
   height: 50px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #2E7D32;
+  border-top: 4px solid #f04d62;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 1rem auto;
@@ -315,7 +316,7 @@
 }
 
 .summary-card .amount {
-  color: #2E7D32;
+  color: #f04d62;
   font-size: 1.8rem;
   font-weight: 700;
   margin: 0 0 0.25rem 0;
@@ -359,7 +360,7 @@
 }
 
 .aging-header {
-  background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+  background: #f04d62;
   color: white;
   display: contents;
 }
@@ -571,7 +572,7 @@
 }
 
 .data-table th {
-  background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+  background: #f04d62;
   color: white;
   padding: 1rem 0.75rem;
   text-align: left;
@@ -663,7 +664,7 @@
 }
 
 .view-btn {
-  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+  background:#f04d62;
   box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
 }
 
@@ -705,7 +706,7 @@
 }
 
 .aging-badge[data-aging="current"] {
-  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+  background: #f04d62;
   color: white;
 }
 
@@ -725,7 +726,7 @@
 }
 
 .aging-badge[data-aging="90plus"] {
-  background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
+  background: #f04d62;
   color: white;
 }
 
@@ -1053,7 +1054,7 @@
 
 /* Status badges for aging */
 .status-badge.current {
-  background-color: #4CAF50;
+  background-color: #f04d62;
 }
 
 .status-badge.days130 {
@@ -1156,13 +1157,13 @@
 
 .toggle-btn:hover {
   background: #e8f5e8;
-  border-color: #4caf50;
+  border-color: #f04d62;
 }
 
 .toggle-btn.active {
-  background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+  background: #f04d62;
   color: white;
-  border-color: #2E7D32;
+  border-color: #f04d62;
   box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3);
 }
 
@@ -1336,7 +1337,7 @@
   font-size: 1.8rem;
   font-weight: 700;
   margin: 0;
-  color: #2E7D32;
+  color: #f04d62;
 }
 
 .summary-card .amount.negative {
@@ -1354,7 +1355,7 @@
 
 .memo-table-container h4 {
   margin: 0 0 1.5rem 0;
-  color: #2E7D32;
+  color: #f04d62;
   font-size: 1.2rem;
   font-weight: 600;
   display: flex;
@@ -1365,7 +1366,7 @@
 /* Credit and Debit Memo Row Styles */
 .credit-memo-row {
   background: rgba(76, 175, 80, 0.05);
-  border-left: 4px solid #4CAF50;
+  border-left: 4px solid #f04d62;
 }
 
 .credit-memo-row:hover {
@@ -1439,7 +1440,7 @@
 }
 
 .sales-breakdown h3 {
-  color: #2E7D32;
+  color: #f04d62;
   margin-bottom: 1.5rem;
   font-size: 1.4rem;
   font-weight: 600;
@@ -1456,7 +1457,7 @@
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
-  border-left: 4px solid #2E7D32;
+  border-left: 4px solid #f04d62;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -1466,7 +1467,7 @@
 }
 
 .breakdown-card.credit-memos {
-  border-left-color: #4CAF50;
+  border-left-color: #f04d62;
 }
 
 .breakdown-card.debit-memos {
@@ -1488,7 +1489,7 @@
 }
 
 .breakdown-header .count {
-  background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+  background: #f04d62;
   color: white;
   padding: 0.3rem 0.8rem;
   border-radius: 20px;
@@ -1499,7 +1500,7 @@
 .breakdown-amount {
   font-size: 1.8rem;
   font-weight: 700;
-  color: #2E7D32;
+  color: #f04d62;
   margin: 0;
 }
 
@@ -1520,7 +1521,7 @@
 }
 
 .recent-transactions h3 {
-  color: #2E7D32;
+  color: #f04d62;
   margin-bottom: 1.5rem;
   font-size: 1.4rem;
   font-weight: 600;
@@ -1579,7 +1580,7 @@
 .document-number {
   font-family: 'Courier New', monospace;
   font-weight: 600;
-  color: #2E7D32;
+  color: #f04d62;
 }
 
 .description {
@@ -1700,7 +1701,7 @@
 }
 
 .filter-section h3 {
-  color: #2E7D32;
+  color: #f04d62;
   margin-bottom: 1rem;
   font-size: 1.2rem;
   font-weight: 600;
@@ -1736,7 +1737,7 @@
 .filter-group input:focus,
 .filter-group select:focus {
   outline: none;
-  border-color: #2E7D32;
+  border-color: #f04d62;
   box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.2);
 }
 
@@ -1764,9 +1765,9 @@
   padding: 0.8rem 1.2rem;
   background: linear-gradient(135deg, #e8f5e8 0%, #f1f8e9 100%);
   border-radius: 8px;
-  border-left: 4px solid #2E7D32;
+  border-left: 4px solid #f04d62;
   font-size: 0.9rem;
-  color: #2E7D32;
+  color: #f04d62;
   font-weight: 500;
 }
 
